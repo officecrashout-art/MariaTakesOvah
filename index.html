@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Maria's Quest: Master Build</title>
+    <title>Maria's Quest: Progress & Action</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         html, body { position: fixed; width: 100%; height: 100%; overflow: hidden; background: #000; margin: 0; padding: 0; }
@@ -11,35 +11,45 @@
         canvas { display: block; background: #1a1a2e; max-width: 100%; max-height: 100%; object-fit: contain; }
 
         /* UI */
-        #ui { position: absolute; top: 10px; left: 10px; z-index: 100; pointer-events: none; }
-        .stats { background: rgba(0,0,0,0.8); padding: 8px 12px; border: 2px solid #00ffff; border-radius: 8px; color: #ffff00; font-size: 16px; font-weight: bold; }
-        #health-bar { width: 120px; height: 10px; background: #333; border: 1px solid #fff; border-radius: 5px; margin-top: 4px; overflow: hidden; }
+        #ui-left { position: absolute; top: 15px; left: 15px; z-index: 100; pointer-events: none; }
+        .stats { background: rgba(0,0,0,0.8); padding: 10px 15px; border: 2px solid #00ffff; border-radius: 8px; color: #ffff00; font-size: 18px; font-weight: bold; }
+        #health-bar { width: 140px; height: 12px; background: #333; border: 1px solid #fff; border-radius: 6px; margin-top: 5px; overflow: hidden; }
         #health-fill { width: 100%; height: 100%; background: #ff0000; transition: width 0.2s; }
+
+        /* PROGRESS BAR */
+        #progress-container { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); width: 250px; text-align: center; z-index: 100; pointer-events: none; }
+        #progress-bg { width: 100%; height: 10px; background: rgba(255,255,255,0.2); border: 1px solid #fff; border-radius: 5px; overflow: hidden; }
+        #progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #ff00ff, #00ffff); }
+        #progress-text { color: white; font-size: 12px; font-weight: bold; margin-top: 4px; text-shadow: 1px 1px #000; }
         
-        #top-btns { position: absolute; top: 10px; right: 10px; display: flex; gap: 10px; z-index: 110; }
-        .small-btn { width: 45px; height: 45px; background: rgba(255,255,255,0.2); border: 2px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; pointer-events: auto; font-size: 12px; }
+        #top-btns { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 110; }
+        .small-btn { width: 50px; height: 50px; background: rgba(255,255,255,0.2); border: 2px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; pointer-events: auto; font-size: 11px; }
 
-        #msg { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 28px; text-align: center; display: none; background: rgba(0,0,0,0.9); padding: 20px; border: 4px solid #ff00ff; color: #00ffff; border-radius: 15px; z-index: 120; width: 70%; }
+        #msg { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 32px; text-align: center; display: none; background: rgba(0,0,0,0.9); padding: 30px; border: 5px solid #ff00ff; color: #00ffff; border-radius: 15px; z-index: 120; width: 80%; }
 
-        /* MOBILE CONTROLS */
-        .controls { position: absolute; bottom: 8%; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 100; pointer-events: none; }
-        .btn-group { display: flex; gap: 15px; pointer-events: none; }
-        .btn { width: 75px; height: 75px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: 3px solid rgba(255,255,255,0.7); pointer-events: auto; font-weight: bold; font-size: 14px; }
-        .btn-fire { background: rgba(255, 0, 0, 0.4); border-color: #ff4444; }
-        .btn:active { background: rgba(255,255,255,0.5); transform: scale(0.9); }
+        /* CONTROLS */
+        .controls { position: absolute; bottom: 40px; width: 100%; display: flex; justify-content: space-between; padding: 0 25px; z-index: 100; pointer-events: none; }
+        .btn-group { display: flex; gap: 20px; pointer-events: none; }
+        .btn { width: 80px; height: 80px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: 3px solid rgba(255,255,255,0.6); pointer-events: auto; font-weight: bold; font-size: 14px; }
+        .btn-fire { background: rgba(255, 0, 0, 0.3); border-color: #ff4444; }
+        .btn:active { background: rgba(255,255,255,0.4); transform: scale(0.9); }
 
         @media (min-width: 1024px) { .controls { display: none; } }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <div id="ui">
+        <div id="ui-left">
             <div class="stats">SCORE: <span id="score">0000</span></div>
             <div id="health-bar"><div id="health-fill"></div></div>
         </div>
+        <div id="progress-container">
+            <div id="progress-bg"><div id="progress-fill"></div></div>
+            <div id="progress-text">CASTLE DISTANCE</div>
+        </div>
         <div id="top-btns">
-            <div id="btnMute" class="small-btn">MUTE</div>
-            <div id="btnR" class="small-btn">R</div>
+            <div id="btnMute" class="small-btn">SOUND</div>
+            <div id="btnR" class="small-btn">RESTART</div>
         </div>
         <div id="msg">HAPPY BIRTHDAY MARIA!</div>
         <div class="controls">
@@ -73,48 +83,56 @@ const sndBGM = new Audio('bgm.mp3'); sndBGM.loop = true;
 // --- STATE ---
 let score = 0, hp = 100, camX = 0, isWin = false, invuln = 0, lastTime = performance.now();
 let bullets = [], particles = [], confetti = [], keys = {}, touch = {L:false, R:false}, isMuted = false;
-let gateOpen = 0;
+let gateOpen = 0, bgmOn = false;
 
-const p = { x: 100, y: 300, w: 110, h: 170, vx: 0, vy: 0, jumps: 0, face: 1 };
+// Clouds (Parallax)
+const clouds = [];
+for(let i=0; i<15; i++) {
+    clouds.push({ x: Math.random() * 12000, y: Math.random() * 250, speed: 0.2 + Math.random() * 0.5, w: 100 + Math.random() * 100 });
+}
+
+const p = { x: 150, y: 100, w: 110, h: 170, vx: 0, vy: 0, jumps: 0, face: 1 };
 const platforms = [
     { x: 0, y: 620, w: 12000, h: 80 },
-    { x: 1400, y: 200, w: 120, h: 500, wall: true },
-    { x: 2800, y: 350, w: 700, h: 40 }
+    { x: 1400, y: 250, w: 120, h: 450, wall: true },
+    { x: 2800, y: 350, w: 700, h: 40 },
+    { x: 5000, y: 300, w: 800, h: 40 },
+    { x: 7200, y: 350, w: 500, h: 40 }
 ];
-const enemies = [
-    { x: 1000, y: 460, w: 100, h: 160, vx: 3, img: zombieImg, start: 1000, range: 400 },
-    { x: 2500, y: 460, w: 110, h: 160, vx: 2, img: frankImg, start: 2500, range: 300 },
-    { x: 5000, y: 460, w: 100, h: 160, vx: 5, img: zombieImg, start: 5000, range: 600 },
-    { x: 8000, y: 460, w: 110, h: 160, vx: 3, img: frankImg, start: 7800, range: 600 }
-];
-const castlePos = { x: 10000, y: 20, w: 500, h: 600 };
-const finishLine = 10100;
 
-// --- FUNCTIONS ---
+// CRANKED UP VILLAIN COUNT
+const enemies = [
+    { x: 800, y: 460, w: 100, h: 160, vx: 3, img: zombieImg, start: 800, range: 300 },
+    { x: 1200, y: 460, w: 110, h: 160, vx: 2, img: frankImg, start: 1200, range: 200 },
+    { x: 2100, y: 460, w: 100, h: 160, vx: 4, img: zombieImg, start: 2100, range: 400 },
+    { x: 2900, y: 190, w: 110, h: 160, vx: 3, img: frankImg, start: 2850, range: 200 }, // Enemy on platform
+    { x: 4000, y: 460, w: 100, h: 160, vx: 5, img: zombieImg, start: 4000, range: 500 },
+    { x: 5100, y: 140, w: 110, h: 160, vx: 4, img: frankImg, start: 5050, range: 300 }, // Enemy on high platform
+    { x: 6200, y: 460, w: 100, h: 160, vx: 3, img: zombieImg, start: 6200, range: 400 },
+    { x: 7300, y: 190, w: 110, h: 160, vx: 4, img: frankImg, start: 7250, range: 250 },
+    { x: 8500, y: 460, w: 100, h: 160, vx: 6, img: zombieImg, start: 8500, range: 300 },
+    { x: 9200, y: 460, w: 110, h: 160, vx: 5, img: frankImg, start: 9200, range: 400 }
+];
+const castlePos = { x: 11000, y: 20, w: 500, h: 600 };
+const finishLine = 11100;
+
+// --- ACTIONS ---
 function toggleMute() {
     isMuted = !isMuted;
     sndBGM.muted = sndShoot.muted = sndHit.muted = isMuted;
-    document.getElementById('btnMute').innerText = isMuted ? "UNMUTE" : "MUTE";
+    document.getElementById('btnMute').innerText = isMuted ? "OFF" : "SOUND";
 }
-
-function startBGM() { if(sndBGM.paused && !isMuted) sndBGM.play().catch(()=>{}); }
-
+function startBGM() { if(!bgmOn && !isMuted) { sndBGM.play().catch(()=>{}); bgmOn = true; } }
 function doJump() { if(p.jumps < 2) { p.vy = -18; p.jumps++; startBGM(); } }
-
 function doShoot() { 
     if(isWin) return;
-    bullets.push({x: p.x+(p.face===1?p.w:0), y: p.y+60, vx: p.face*25, life: 80});
-    sndShoot.currentTime = 0; sndShoot.play().catch(()=>{}); 
+    bullets.push({x: p.x+(p.face===1?p.w:0), y: p.y+65, vx: p.face*25, life: 80});
+    sndShoot.currentTime = 0; sndShoot.play().catch(()=>{}); startBGM();
 }
 
-// --- INPUTS (FIXED PC BUG) ---
-window.onkeydown = e => { 
-    keys[e.code] = true; startBGM();
-    if(['Space','ArrowUp','KeyW'].includes(e.code)) { e.preventDefault(); doJump(); }
-    if(['KeyF','KeyK','ShiftLeft'].includes(e.code)) doShoot();
-};
-window.onkeyup = e => { keys[e.code] = false; };
-
+// --- INPUTS ---
+window.onkeydown = e => { keys[e.code] = true; if(['Space','ArrowUp','KeyW'].includes(e.code)) { e.preventDefault(); doJump(); } if(['KeyF','KeyK','ShiftLeft'].includes(e.code)) doShoot(); };
+window.onkeyup = e => keys[e.code] = false;
 document.getElementById('btnR').onclick = () => location.reload();
 document.getElementById('btnMute').onclick = toggleMute;
 
@@ -125,22 +143,23 @@ const bind = (id, k, move) => {
 };
 bind('btnL','L',true); bind('btnRight','R',true); bind('btnJump','',false); bind('btnShoot','',false);
 
-// --- MAIN LOOP ---
 function update(time) {
     const dt = (time - lastTime) / 16.67 || 1; lastTime = time;
     if(invuln > 0) invuln -= dt;
 
     if(!isWin) {
-        // Unified Movement Check
         const moveR = keys.ArrowRight || keys.KeyD || touch.R;
         const moveL = keys.ArrowLeft || keys.KeyA || touch.L;
+        if(moveR) { p.vx = Math.min(p.vx + 1.5*dt, 10); p.face=1; }
+        else if(moveL) { p.vx = Math.max(p.vx - 1.5*dt, -10); p.face=-1; }
+        else p.vx *= Math.pow(0.82, dt);
 
-        if(moveR) { p.vx = Math.min(p.vx + 1.6*dt, 10); p.face=1; }
-        else if(moveL) { p.vx = Math.max(p.vx - 1.6*dt, -10); p.face=-1; }
-        else p.vx *= Math.pow(0.8, dt);
-
-        p.vy += 0.6*dt; p.x += p.vx*dt; p.y += p.vy*dt;
+        p.vy += 0.55*dt; p.x += p.vx*dt; p.y += p.vy*dt;
         if(castlePos.x - p.x < 800) gateOpen = Math.min(gateOpen+0.02*dt, 1);
+
+        // Progress Bar Calculation
+        let prog = Math.min((p.x / finishLine) * 100, 100);
+        document.getElementById('progress-fill').style.width = prog + '%';
 
         platforms.forEach(plat => {
             if(p.x < plat.x + plat.w && p.x + p.w > plat.x && p.y < plat.y + plat.h && p.y + p.h > plat.y) {
@@ -168,11 +187,11 @@ function update(time) {
         });
         if(p.x > finishLine) { isWin=true; document.getElementById('msg').style.display='block'; }
     } else {
-        if(Math.random()<0.2) confetti.push({x:p.x+Math.random()*200-100, y:p.y, vx:(Math.random()-0.5)*10, vy:(Math.random()-1)*10, size:Math.random()*6+2, color:`hsl(${Math.random()*360},100%,50%)`, life:100});
+        if(Math.random()<0.3) confetti.push({x:p.x+Math.random()*200-100, y:p.y-100, vx:(Math.random()-0.5)*15, vy:(Math.random()-1.2)*15, size:Math.random()*8+4, color:`hsl(${Math.random()*360},100%,50%)`, life:100});
     }
 
     bullets.forEach((b, i) => { b.x += b.vx*dt; b.life-=dt; if(b.life<=0) bullets.splice(i,1); });
-    confetti.forEach((c, i) => { c.x+=c.vx*dt; c.y+=c.vy*dt; c.vy+=0.3*dt; c.life-=dt; if(c.life<=0) confetti.splice(i,1); });
+    confetti.forEach((c, i) => { c.x+=c.vx*dt; c.y+=c.vy*dt; c.vy+=0.4*dt; c.life-=dt; if(c.life<=0) confetti.splice(i,1); });
 
     camX += (p.x - canvas.width/4 - camX) * 0.1 * dt;
     draw();
@@ -181,20 +200,39 @@ function update(time) {
 
 function draw() {
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    let sky = Math.min(p.x/finishLine, 1);
-    ctx.fillStyle = `rgb(${40-20*sky}, ${80-60*sky}, ${150-100*sky})`;
+    
+    // Dynamic Sky
+    let skyProg = Math.min(p.x / finishLine, 1);
+    let r = Math.floor(135 - skyProg * 115); 
+    let g = Math.floor(206 - skyProg * 196); 
+    let b = Math.floor(235 - skyProg * 185); 
+    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
     ctx.fillRect(0,0,canvas.width,canvas.height);
 
+    // Clouds
+    ctx.fillStyle = `rgba(255, 255, 255, ${0.8 - skyProg * 0.6})`;
+    clouds.forEach(c => {
+        let cx = (c.x - camX * c.speed) % 2400;
+        if (cx < -200) cx += 2400;
+        ctx.beginPath();
+        ctx.arc(cx, c.y, c.w/2.5, 0, Math.PI*2);
+        ctx.arc(cx + c.w/3, c.y - 10, c.w/3, 0, Math.PI*2);
+        ctx.arc(cx + c.w/1.5, c.y, c.w/3, 0, Math.PI*2);
+        ctx.fill();
+    });
+
     ctx.save(); ctx.translate(-camX, 0);
+    
     if(castleImg.complete) {
         ctx.drawImage(castleImg, castlePos.x, castlePos.y, castlePos.w, castlePos.h);
         ctx.fillStyle = "black";
-        ctx.fillRect(castlePos.x+castlePos.w/2-40-(gateOpen*30), castlePos.y+castlePos.h-120, 40, 100);
-        ctx.fillRect(castlePos.x+castlePos.w/2+(gateOpen*30), castlePos.y+castlePos.h-120, 40, 100);
+        ctx.fillRect(castlePos.x+castlePos.w/2-40-(gateOpen*45), castlePos.y+castlePos.h-130, 45, 110);
+        ctx.fillRect(castlePos.x+castlePos.w/2+(gateOpen*45), castlePos.y+castlePos.h-130, 45, 110);
     }
-    ctx.fillStyle = "#332211"; platforms.forEach(plat => ctx.fillRect(plat.x, plat.y, plat.w, plat.h));
+
+    ctx.fillStyle = "#3e2723"; platforms.forEach(plat => ctx.fillRect(plat.x, plat.y, plat.w, plat.h));
     enemies.forEach(en => { if(en.img.complete) ctx.drawImage(en.img, en.x, en.y, en.w, en.h); });
-    ctx.fillStyle = "#0ff"; bullets.forEach(b => ctx.fillRect(b.x, b.y, 25, 8));
+    ctx.fillStyle = "#0ff"; bullets.forEach(b => { ctx.beginPath(); ctx.arc(b.x, b.y, 14, 0, Math.PI*2); ctx.fill(); });
     confetti.forEach(c => { ctx.fillStyle=c.color; ctx.fillRect(c.x, c.y, c.size, c.size); });
 
     if(!(invuln%4 > 2) && mariaImg.complete) {
